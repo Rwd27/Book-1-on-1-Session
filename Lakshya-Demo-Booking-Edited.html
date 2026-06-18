@@ -893,9 +893,9 @@ textarea{resize:vertical; min-height:88px; line-height:1.65;}
 </div><!-- /form-panel -->
 
 <script>
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 //  CONFIGURATION
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 const GOOGLE_SCRIPT_URL           = "https://script.google.com/macros/s/AKfycbxSzRBn3P3yKIgIrEI6aAISpyRqgIcctcp-S_43wpO6knvhgLDOFJaCI-EuADhvbIA/exec";
 const EMAILJS_PUBLIC_KEY          = "xwu7IQhIwUtpnz8aE";
 const EMAILJS_SERVICE_ID          = "service_rcn9pd3";
@@ -1107,11 +1107,12 @@ function validate(form) {
   let ok = true;
   const clr = id => { const el = document.getElementById(id); if(el) el.classList.remove('has-error'); };
   const err = id => { const el = document.getElementById(id); if(el) el.classList.add('has-error'); ok = false; };
-  ['f-name','f-email','f-phone','f-course','f-date','f-othercourse'].forEach(clr);
+  ['f-name','f-email','f-phone','f-webinar','f-course','f-date','f-othercourse'].forEach(clr);
   const v = n => form.elements[n]?.value?.trim();
   if (!v('full_name'))    err('f-name');
   if (!v('email') || !/\S+@\S+\.\S+/.test(v('email'))) err('f-email');
   if (!v('phone'))        err('f-phone');
+  if (!v('webinar_name')) err('f-webinar');
   if (wantsSession) {
     if (!v('course'))     err('f-course');
     if (v('course') === 'Others' && !v('other_course')) err('f-othercourse');
@@ -1122,10 +1123,6 @@ function validate(form) {
 
 // ══════════════════════════════════════════════════════════════════
 //  SUBMIT HANDLER
-//  1. POST to Google Apps Script (URL-encoded — BUG 1 FIX) → sequential scholarship code
-//  2. Admin email via EmailJS (to_name + to_email — BUG 2 FIX)
-//  3. Student ticket email via EmailJS (to_name + to_email — BUG 2 FIX)
-//  4. Show premium Scholarship Passport ticket
 // ══════════════════════════════════════════════════════════════════
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -1157,22 +1154,13 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   params.wants_scholarship = wantsScholarship ? 'Yes' : 'No';
 
   // ── STEP 1: POST to Google Apps Script → get scholarship code ──
-  // BUG 1 FIX: Send as application/x-www-form-urlencoded, NOT application/json.
-  // Google Apps Script doPost cannot handle a JSON Content-Type preflight
-  // request — the CORS headers it needs to respond with are not sent, causing
-  // the browser to block the response. URL-encoded bodies do not trigger a
-  // preflight and are read via e.parameter.fieldName in Apps Script.
   let schCode = '—';
   try {
     status.textContent = '⏳ Generating your scholarship code…';
-    const urlEncoded = Object.keys(params)
-      .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k] ?? ''))
-      .join('&');
-
     const dbRes  = await fetch(GOOGLE_SCRIPT_URL, {
       method : 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body   : urlEncoded
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(params)
     });
     const dbData = await dbRes.json();
 
@@ -1228,55 +1216,44 @@ Submitted At:  ${params.submission_time}
   `.trim();
 
   // ── STEP 2: Admin notification email ──────────────────────────
-  // BUG 2 FIX: Pass to_name + to_email so EmailJS routes correctly.
-  // IMPORTANT — in your EmailJS admin template, set the "To Email" field
-  // to {{to_email}} (not a hard-coded address).
   try {
     status.textContent = '📧 Sending admin notification…';
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_ADMIN, {
       ...params,
-      to_name : 'IIC Lakshya Admin',
       to_email: 'renoldwilson@iiclakshya.com'
     });
   } catch (adminErr) {
+    // Log but don't block — student email still goes out
     console.warn('Admin email failed:', adminErr);
   }
 
   // ── STEP 3: Student / Parent ticket email ──────────────────────
-  // BUG 2 FIX: to_name drives the EmailJS template "To Name" field.
-  // IMPORTANT — in your EmailJS student template:
-  //   • "To Email" field → {{to_email}}
-  //   • "To Name" field  → {{to_name}}
-  // Template variables: {{to_email}}, {{to_name}}, {{student_name}},
-  // {{webinar_name}}, {{session_date}}, {{session_slot}}, {{session_mode}},
-  // {{course}}, {{wants_scholarship}}, {{scholarship_code}}, {{submission_time}}
   try {
     status.textContent = '📧 Sending your confirmation email…';
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_STUDENT, {
-      to_email          : params.email,
-      to_name           : params.full_name,
-      student_name      : params.full_name,
-      webinar_name      : params.webinar_name,
-      session_date      : params.preferred_date,
-      session_slot      : params.time_slot,
-      session_mode      : params.mode,
-      course            : params.course,
-      wants_scholarship : params.wants_scholarship,
-      scholarship_code  : schCode,
-      submission_time   : params.submission_time
+      to_email        : params.email,
+      student_name    : params.full_name,
+      webinar_name    : params.webinar_name,
+      session_date    : params.preferred_date,
+      session_slot    : params.time_slot,
+      session_mode    : params.mode,
+      course          : params.course,
+      wants_scholarship: params.wants_scholarship,
+      scholarship_code: schCode,
+      submission_time : params.submission_time
     });
   } catch (stuErr) {
     console.warn('Student email failed:', stuErr);
   }
 
-  // ── STEP 4: Show premium Scholarship Passport ticket ──────────
+  // ── STEP 4: Show premium ticket card ──────────────────────────
   renderTicketMeta(params, schCode);
 
-  if (wantsScholarship && schCode !== '—') {
-    document.getElementById('passportStrip').style.display  = 'flex';
-    document.getElementById('passportCode').textContent     = schCode;
-    document.getElementById('schShareNote').style.display   = 'block';
+  if (wantsScholarship) {
+    document.getElementById('passportCode').textContent = schCode;
+    document.getElementById('passportStrip').style.display = 'flex';
     document.getElementById('schShareCodeInline').textContent = schCode;
+    document.getElementById('schShareNote').style.display = 'block';
   }
 
   document.getElementById('bookingForm').style.display = 'none';
