@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>IIC Lakshya Scholarship Code</title>
+</head>
+
+<body style="margin:0;padding:0;background:#eef4ff;font-family:Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:30px 10px;">
+<tr>
+<td align="center">
+
+<table width="700" cellpadding="0" cellspacing="0" style="max-width:700px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.12);">
+
+<!-- HEADER -->
+
+<tr>
+<td style="background:linear-gradient(135deg,#081d52,#1a4bb5);padding:40px;text-align:center;">
+
+<div style="font-size:14px;color:#f5c518;letter-spacing:3px;font-weight:bold;">
+IIC LAKSHYA
+</div>
+
+<h1 style="color:#ffffff;margin:10px 0 0 0;font-size:34px;">
+Scholarship Passport
+</h1>
+
+<p style="color:#dbeafe;margin-top:10px;">
+Faculty Connect Program 2026
+</p>
+
+</td>
+</tr>
+
+<!-- SUCCESS -->
+
+<tr>
+<td style="padding:40px;">
+
+<h2 style="color:#0b2563;margin-top:0;">
+🎉 Congratulations {{student_name}}
+</h2>
+
+<p style="font-size:16px;color:#555;line-height:1.8;">
+Your registration has been successfully confirmed.
+You have secured your Faculty Connect Session and Scholarship Passport.
+</p>
+
+</td>
+</tr>
+
+<!-- SCHOLARSHIP CODE -->
+
+<tr>
+<td style="padding:0 40px 20px 40px;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#111827,#0b2563);border-radius:20px;overflow:hidden;">
+
+<tr>
+<td style="padding:30px;text-align:center;">
+
+<div style="font-size:13px;color:#f5c518;font-weight:bold;letter-spacing:3px;">
+🏅 YOUR SCHOLARSHIP CODE
+</div>
+
+<div style="font-size:42px;color:#ffffff;font-weight:bold;letter-spacing:4px;margin-top:15px;">
+{{scholarship_code}}
+</div>
+
+<div style="margin-top:15px;color:#dbeafe;font-size:14px;">
+Share this code during enrollment to unlock scholarship benefits.
+</div>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+<!-- SESSION CARD -->
+
+<tr>
+<td style="padding:0 40px 20px 40px;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fbff;border:1px solid #dbeafe;border-radius:18px;">
+
+<tr>
+<td style="padding:25px;">
+
+<h3 style="margin-top:0;color:#0b2563;">
+📅 Session Information
+</h3>
+
+<table width="100%" cellpadding="8">
+
+<tr>
+<td width="40%"><strong>Date</strong></td>
+<td>{{session_date}}</td>
+</tr>
+
+<tr>
+<td><strong>Time Slot</strong></td>
+<td>{{session_slot}}</td>
+</tr>
+
+<tr>
+<td><strong>Mode</strong></td>
+<td>{{session_mode}}</td>
+</tr>
+
+<tr>
+<td><strong>Course</strong></td>
+<td>{{course}}</td>
+</tr>
+
+<tr>
+<td><strong>Webinar Attended</strong></td>
+<td>{{webinar_name}}</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+<!-- BENEFITS -->
+
+<tr>
+<td style="padding:0 40px 30px 40px;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8dd;border:1px solid #f5c518;border-radius:18px;">
+
+<tr>
+<td style="padding:25px;">
+
+<h3 style="margin-top:0;color:#7a5d00;">
+🎓 Benefits Available to You
+</h3>
+
+<ul style="color:#555;line-height:2;">
+<li>Personal Faculty Guidance</li>
+<li>Career & Course Roadmap</li>
+<li>Scholarship Benefits</li>
+<li>Priority Counselling Support</li>
+<li>Admission Assistance</li>
+</ul>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+<!-- CTA -->
+
+<tr>
+<td style="padding:0 40px 40px 40px;text-align:center;">
+
+<a href="https://iiclakshya.com"
+style="display:inline-block;background:#1a4bb5;color:#ffffff;text-decoration:none;padding:14px 30px;border-radius:30px;font-weight:bold;">
+Visit IIC Lakshya </a>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+
+<tr>
+<td style="background:#0b2563;padding:25px;text-align:center;">
+
+<div style="color:#ffffff;font-size:14px;font-weight:bold;">
+IIC Lakshya
+</div>
+
+<div style="color:#dbeafe;font-size:12px;margin-top:8px;">
+Submission Time: {{submission_time}}
+</div>
+
+<div style="color:#dbeafe;font-size:12px;margin-top:5px;">
+This is an automated confirmation email.
+</div>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
