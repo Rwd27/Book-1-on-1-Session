@@ -58,7 +58,14 @@ body{
   position:absolute; bottom:0; left:0; right:0; height:6px;
   background:linear-gradient(90deg, var(--yellow), transparent 80%);
 }
-.hero-logo{max-width:340px;width:100%;height:auto;margin-bottom:22px;display:block;}
+.hero-logo{
+  max-width:300px;
+  width:100%;
+  height:auto;
+  margin:0 auto 22px;
+  display:block;
+  object-fit:contain;
+}
 .hero-badge{
   display:inline-flex; align-items:center; gap:8px;
   background:rgba(245,197,24,0.14); border:1px solid rgba(245,197,24,0.38);
@@ -554,12 +561,7 @@ textarea{resize:vertical; min-height:88px; line-height:1.65;}
 <!-- ════ LEFT HERO ════ -->
 <div class="hero">
   <div class="hero-arc"></div>
- <!-- New Optimized Square-Canvas Logo Integration -->
-        <div style="margin: -35px 0 1rem -15px; width: 100%; max-width: 260px; height: 75px; overflow: hidden; display: flex; align-items: center; justify-content: flex-start;">
-            <img src="Lakshya Logo(White).png" 
-                 alt="Logo" 
-                 style="width: 100%; height: auto; margin-top: 5px; object-fit: contain; display: block;">
-        </div>
+  <img src="Lakshya Logo(White).png" alt="IIC Lakshya Logo" class="hero-logo"/>
   <div class="hero-badge">IIC Lakshya Faculty Connect</div>
   <h1>Book Your <em>1-on-1</em><br/>Session</h1>
   <p>Thank you for registering for our Webinar / Seminar. Fill in your details and book a dedicated session with our expert Lakshya Faculty — at a time that works for you.</p>
@@ -823,7 +825,7 @@ textarea{resize:vertical; min-height:88px; line-height:1.65;}
           </div>
         </div>
         <div class="sch-info" id="scholarshipDetails">
-          ✅ A <strong>unique scholarship code</strong> will be generated for you upon submission. Share it with peers, juniors, or family — they can apply it at enrollment with IIC Lakshya for a <strong>special discount</strong>.
+          ✅ A <strong>unique scholarship code</strong> will be generated for you upon submission. Share it with peers, juniors, or family — they can apply it at enrollment with IIC Lakshya for a discount or waiver.
         </div>
       </div>
 
@@ -1002,260 +1004,204 @@ function updateMonthPickerActive() {
 }
 
 function renderCalendar() {
-  const year = 2026;
-  const month = calCurrentMonth;
+  const monthName = document.getElementById('calMonthName');
+  const daysContainer = document.getElementById('calDays');
+  monthName.textContent = MONTHS[calCurrentMonth];
+  daysContainer.innerHTML = '';
+  const firstDay = new Date(2026, calCurrentMonth, 1).getDay();
+  const daysInMonth = new Date(2026, calCurrentMonth + 1, 0).getDate();
   const today = new Date();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  document.getElementById('calMonthName').textContent = MONTHS[month];
-  updateMonthPickerActive();
-
-  const grid = document.getElementById('calDays');
-  grid.innerHTML = '';
-
+  const isCurrentMonth = calCurrentMonth === today.getMonth() && 2026 === today.getFullYear();
+  const todayDate = today.getDate();
   for (let i = 0; i < firstDay; i++) {
-    const emp = document.createElement('div');
-    emp.className = 'cal-day empty';
-    grid.appendChild(emp);
+    const emptyDay = document.createElement('div');
+    emptyDay.className = 'cal-day empty';
+    daysContainer.appendChild(emptyDay);
   }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const cell = document.createElement('div');
-    cell.className = 'cal-day';
-    cell.textContent = d;
-
-    const thisDate = new Date(year, month, d);
-    const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d);
-    const isPast = thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const dayOfWeek = thisDate.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-    if (isPast) {
-      cell.classList.add('past');
-    } else {
-      if (isToday) cell.classList.add('today-highlight');
-      if (isWeekend) cell.classList.add('weekend-day');
-      if (selectedDate &&
-          selectedDate.getFullYear() === year &&
-          selectedDate.getMonth() === month &&
-          selectedDate.getDate() === d) {
-        cell.classList.add('selected');
-      }
-      cell.onclick = () => selectDate(year, month, d);
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayEl = document.createElement('div');
+    dayEl.className = 'cal-day';
+    dayEl.textContent = day;
+    const d = new Date(2026, calCurrentMonth, day);
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    if (isWeekend) dayEl.classList.add('weekend-day');
+    if (isCurrentMonth && day === todayDate) {
+      dayEl.classList.add('today-highlight');
+    } else if (d < today) {
+      dayEl.classList.add('past');
     }
-    grid.appendChild(cell);
+    dayEl.onclick = () => {
+      if (!dayEl.classList.contains('past') && !dayEl.classList.contains('empty')) {
+        document.querySelectorAll('#calDays .cal-day').forEach(d => d.classList.remove('selected'));
+        dayEl.classList.add('selected');
+        selectedDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        document.getElementById('preferredDateHidden').value = selectedDate;
+        document.getElementById('calTriggerText').textContent = selectedDate;
+        document.getElementById('calTriggerText').classList.remove('cal-placeholder');
+        document.getElementById('calTriggerText').classList.add('cal-selected');
+        document.getElementById('calDropdown').classList.remove('open');
+        document.getElementById('calTrigger').classList.remove('open');
+      }
+    };
+    daysContainer.appendChild(dayEl);
   }
-
-  document.getElementById('calHint').textContent = MONTHS[month] + ' 2026';
 }
 
-function selectDate(year, month, day) {
-  selectedDate = new Date(year, month, day);
-  const formatted = day + ' ' + MONTHS[month] + ' 2026';
-  document.getElementById('preferredDateHidden').value = formatted;
-  const trigger = document.getElementById('calTriggerText');
-  trigger.textContent = formatted;
-  trigger.classList.remove('cal-placeholder');
-  trigger.classList.add('cal-selected');
-  document.getElementById('calDropdown').classList.remove('open');
-  document.getElementById('calTrigger').classList.remove('open');
-  renderCalendar();
-  document.getElementById('f-date').classList.remove('has-error');
+function toggleCalendar() {
+  const dropdown = document.getElementById('calDropdown');
+  const trigger = document.getElementById('calTrigger');
+  dropdown.classList.toggle('open');
+  trigger.classList.toggle('open');
+  if (dropdown.classList.contains('open')) {
+    renderCalendar();
+  }
 }
 
 function calNav(dir) {
-  calCurrentMonth = (calCurrentMonth + dir + 12) % 12;
+  calCurrentMonth += dir;
+  if (calCurrentMonth < 0) calCurrentMonth = 11;
+  if (calCurrentMonth > 11) calCurrentMonth = 0;
   renderCalendar();
+  updateMonthPickerActive();
 }
 
 function calGoToday() {
   const today = new Date();
-  calCurrentMonth = (today.getFullYear() === 2026) ? today.getMonth() : 0;
+  calCurrentMonth = today.getMonth();
   renderCalendar();
+  updateMonthPickerActive();
 }
-
-function toggleCalendar() {
-  const dd = document.getElementById('calDropdown');
-  const trigger = document.getElementById('calTrigger');
-  const isOpen = dd.classList.contains('open');
-  dd.classList.toggle('open', !isOpen);
-  trigger.classList.toggle('open', !isOpen);
-}
-
-document.addEventListener('click', function(e) {
-  const wrapper = document.querySelector('.cal-wrapper');
-  if (wrapper && !wrapper.contains(e.target)) {
-    document.getElementById('calDropdown').classList.remove('open');
-    document.getElementById('calTrigger').classList.remove('open');
-  }
-});
 
 renderCalendar();
 
-// ── Validation ─────────────────────────────────────────────────────
-function validate(form) {
-  let ok = true;
-  const clr = id => { const el = document.getElementById(id); if(el) el.classList.remove('has-error'); };
-  const err = id => { const el = document.getElementById(id); if(el) el.classList.add('has-error'); ok = false; };
-  
-  ['f-name','f-email','f-phone','f-city','f-school','f-grade','f-stream','f-course','f-date','f-othercourse'].forEach(clr);
-  
-  const v = n => form.elements[n]?.value?.trim();
-  
-  // Strict Validation Rules for "Your Details"
-  if (!v('full_name')) err('f-name');
-  if (!v('email') || !/\S+@\S+\.\S+/.test(v('email'))) err('f-email');
-  if (!v('phone')) err('f-phone');
-  if (!v('city')) err('f-city');
-  if (!v('school')) err('f-school');
-  if (!v('grade')) err('f-grade');
-  if (!getSelectedRadioValue('streamGroup')) err('f-stream');
-  
-  if (wantsSession) {
-    if (!v('course'))     err('f-course');
-    if (v('course') === 'Others' && !v('other_course')) err('f-othercourse');
-    if (!v('preferred_date')) err('f-date');
-  }
-  return ok;
-}
-
-document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (!validate(this)) return;
-
-  const btn    = document.getElementById('submitBtn');
-  const status = document.getElementById('statusBar');
-  btn.disabled = true;
-  status.className = 'statusBar sending';
-  status.textContent = '⏳ Saving your registration…';
-
-  const fd = new FormData(this);
-  const params = {};
-  fd.forEach((val, key) => { params[key] = val; });
-
-  params.stream = getSelectedRadioValue('streamGroup');
-  params.attended = getSelectedRadioValue('attendedGroup') || '—';
-  params.wants_session   = wantsSession     ? 'Yes' : 'No';
-  params.submission_time = new Date().toLocaleString('en-AE', { timeZone: 'Asia/Dubai' });
-
-  if (params.course === 'Others' && params.other_course) {
-    params.course = 'Others — ' + params.other_course;
+  const form = e.target;
+  const statusBar = document.getElementById('statusBar');
+  const submitBtn = document.getElementById('submitBtn');
+  statusBar.textContent = '';
+  statusBar.classList.remove('error-status', 'sending');
+  let hasError = false;
+  const requiredFields = ['f-name', 'f-email', 'f-phone', 'f-city', 'f-school', 'f-grade', 'f-stream'];
+  if (wantsSession) {
+    requiredFields.push('f-course', 'f-date');
   }
-  if (!wantsSession) {
-    params.course = '—'; params.topic = '—';
-    params.preferred_date = '—'; params.time_slot = '—';
-    params.mode = '—'; params.specific_query = '—';
-  }
-
-  params.wants_scholarship = wantsScholarship ? 'Yes' : 'No';
-
-  let schCode = '—';
-  try {
-    status.textContent = '⏳ Generating your scholarship code…';
-    const urlEncoded = Object.keys(params)
-      .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k] ?? ''))
-      .join('&');
-
-    const dbRes  = await fetch(GOOGLE_SCRIPT_URL, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body   : urlEncoded
-    });
-    const dbData = await dbRes.json();
-
-    if (dbData.success) {
-      schCode = dbData.scholarship_code || '—';
+  requiredFields.forEach(id => {
+    const field = document.getElementById(id);
+    const input = field.querySelector('input, select, textarea');
+    let value = '';
+    if (input.type === 'radio') {
+      value = getSelectedRadioValue(field.id.replace('f-', '').toLowerCase() + 'Group');
+      if (!value) {
+        const radioGroup = field.querySelector('[id$="Group"]');
+        if (radioGroup) {
+          value = radioGroup.querySelector('input[type="radio"]:checked')?.value || '';
+        }
+      }
     } else {
-      throw new Error(dbData.error || 'Database error');
+      value = input.value.trim();
     }
-  } catch (dbErr) {
-    status.className = 'statusBar error-status';
-    status.textContent = '⚠ Could not reach the registration database. Please try again or email renoldwilson@iiclakshya.com directly.';
-    btn.disabled = false;
-    console.error('Google Apps Script error:', dbErr);
+    if (!value) {
+      field.classList.add('has-error');
+      hasError = true;
+    } else {
+      field.classList.remove('has-error');
+    }
+  });
+  if (wantsSession && document.getElementById('courseSelect').value === 'Others') {
+    const otherField = document.getElementById('f-othercourse');
+    if (!otherField.querySelector('input').value.trim()) {
+      otherField.classList.add('has-error');
+      hasError = true;
+    } else {
+      otherField.classList.remove('has-error');
+    }
+  }
+  if (hasError) {
+    statusBar.textContent = '❌ Please fill in all required fields.';
+    statusBar.classList.add('error-status');
     return;
   }
-
-  params.scholarship_code = schCode;
-
-  params.form_summary = `
-=== IIC LAKSHYA — 1-ON-1 SESSION REGISTRATION ===
-
-PERSONAL DETAILS
-Full Name:     ${params.full_name     || '—'}
-Email:         ${params.email         || '—'}
-Phone/WA:      ${params.phone         || '—'}
-City:          ${params.city          || '—'}
-School:        ${params.school        || '—'}
-Grade:         ${params.grade         || '—'}
-Stream:        ${params.stream        || '—'}
-
-WEBINAR / SEMINAR
-Attended:      ${params.attended      || '—'}
-Rating:        ${params.rating        || '—'}
-Key Takeaway:  ${params.takeaway      || '—'}
-
-1-ON-1 SESSION
-Wants Session: ${params.wants_session}
-Course:        ${params.course        || '—'}
-Topic:         ${params.topic         || '—'}
-Date:          ${params.preferred_date|| '—'}
-Time Slot:     ${params.time_slot     || '—'}
-Mode:          ${params.mode          || '—'}
-Query:         ${params.specific_query|| '—'}
-
-SCHOLARSHIP
-Wants Code:    ${params.wants_scholarship}
-Code Issued:   ${schCode}
-
-Consent:       ${params.consent}
-Submitted At:  ${params.submission_time}
-  `.trim();
-
+  statusBar.textContent = '📤 Sending your details...';
+  statusBar.classList.add('sending');
+  submitBtn.disabled = true;
+  const formData = new FormData(form);
+  const data = {
+    full_name: formData.get('full_name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    city: formData.get('city'),
+    school: formData.get('school'),
+    grade: formData.get('grade'),
+    stream: formData.get('stream'),
+    attended: formData.get('attended') || 'Not specified',
+    rating: formData.get('rating') || 'Not provided',
+    takeaway: formData.get('takeaway') || '',
+    wants_session: formData.get('wants_session'),
+    course: formData.get('course') || '',
+    other_course: formData.get('other_course') || '',
+    topic: formData.get('topic') || '',
+    preferred_date: formData.get('preferred_date') || '',
+    mode: formData.get('mode') || '',
+    time_slot: formData.get('time_slot') || '',
+    specific_query: formData.get('specific_query') || '',
+    wants_scholarship: formData.get('wants_scholarship'),
+    consent: formData.get('consent'),
+    timestamp: new Date().toISOString(),
+  };
   try {
-    status.textContent = '📧 Sending admin notification…';
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_ADMIN, {
-      ...params,
-      to_name : 'IIC Lakshya Admin',
-      to_email: 'renoldwilson@iiclakshya.com'
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
-  } catch (adminErr) {
-    console.warn('Admin email failed:', adminErr);
+    const result = await response.json();
+    if (result.status === 'success') {
+      const scholarshipCode = result.scholarship_code || 'SCHOL-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      renderTicketMeta(data, scholarshipCode);
+      if (wantsScholarship) {
+        document.getElementById('passportStrip').style.display = 'flex';
+        document.getElementById('passportCode').textContent = scholarshipCode;
+        document.getElementById('schShareNote').style.display = 'block';
+        document.getElementById('schShareCodeInline').textContent = scholarshipCode;
+      }
+      document.getElementById('formCard').style.display = 'none';
+      document.getElementById('successCard').style.display = 'block';
+      statusBar.textContent = '';
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_STUDENT, {
+          student_name: data.full_name,
+          student_email: data.email,
+          scholarship_code: scholarshipCode,
+          session_date: data.preferred_date,
+          session_slot: data.time_slot,
+          session_mode: data.mode,
+          course: data.course,
+          webinar_name: data.attended,
+          submission_time: new Date().toLocaleString(),
+        });
+      } catch (emailErr) {
+        console.log('Email sending skipped or failed:', emailErr);
+      }
+    } else {
+      statusBar.textContent = '❌ ' + (result.message || 'An error occurred. Please try again.');
+      statusBar.classList.add('error-status');
+      submitBtn.disabled = false;
+    }
+  } catch (err) {
+    statusBar.textContent = '❌ Network error. Please check your connection.';
+    statusBar.classList.add('error-status');
+    submitBtn.disabled = false;
+    console.error('Error:', err);
   }
+});
 
-  try {
-    status.textContent = '📧 Sending your confirmation email…';
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_STUDENT, {
-      to_email          : params.email,
-      to_name           : params.full_name,
-      student_name      : params.full_name,
-      webinar_name      : params.webinar_name,
-      session_date      : params.preferred_date,
-      session_slot      : params.time_slot,
-      session_mode      : params.mode,
-      course            : params.course,
-      wants_scholarship : params.wants_scholarship,
-      scholarship_code  : schCode,
-      submission_time   : params.submission_time
-    });
-  } catch (stuErr) {
-    console.warn('Student email failed:', stuErr);
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('calDropdown');
+  const trigger = document.getElementById('calTrigger');
+  if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+    trigger.classList.remove('open');
   }
-
-  renderTicketMeta(params, schCode);
-
-  if (wantsScholarship && schCode !== '—') {
-    document.getElementById('passportStrip').style.display  = 'flex';
-    document.getElementById('passportCode').textContent     = schCode;
-    document.getElementById('schShareNote').style.display   = 'block';
-    document.getElementById('schShareCodeInline').textContent = schCode;
-  }
-
-  document.getElementById('bookingForm').style.display = 'none';
-  const sc = document.getElementById('successCard');
-  sc.style.display = 'block';
-  sc.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 </script>
 </body>
