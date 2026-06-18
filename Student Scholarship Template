@@ -19,9 +19,11 @@
 <tr>
 <td style="background:linear-gradient(135deg,#081d52,#1a4bb5);padding:40px;text-align:center;">
 
-<div style="font-size:14px;color:#f5c518;letter-spacing:3px;font-weight:bold;">
-IIC LAKSHYA
-</div>
+<div style="margin: -35px 0 1rem -15px; width: 100%; max-width: 260px; height: 75px; overflow: hidden; display: flex; align-items: center; justify-content: flex-start;">
+            <img src="Untitled design (7).png" 
+                 alt="Logo" 
+                 style="width: 100%; height: auto; margin-top: 5px; object-fit: contain; display: block;">
+        </div>
 
 <h1 style="color:#ffffff;margin:10px 0 0 0;font-size:34px;">
 Scholarship Passport
